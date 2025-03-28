@@ -107,10 +107,10 @@ def get_agent_response(user_input, user):
         memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
         for msg_pair in chat_history:
             memory.chat_memory.add_user_message(msg_pair["user"])
-            memory.chat_memory.add_ai_message(str(str(msg_pair["context"])+"\n\n"+str(msg_pair["bot"])))
+            memory.chat_memory.add_ai_message(str(str(msg_pair['context'])+"\n\n"+str(msg_pair["bot"])))
         raw_history=''
         if chat_history:
-            raw_history = "\n".join([f"User: {str(pair['user'])}\nBot: {str(str(str(msg_pair["context"])+"\n\n"+str(msg_pair["bot"])))}" for pair in chat_history[-6:]])
+            raw_history = "\n".join([f"User: {str(pair['user'])}\nBot: {str(str(str(msg_pair['context'])+"\n\n"+str(msg_pair["bot"])))}" for pair in chat_history[-6:]])
         
         try:
             reddit_query = query_chain.run({"chat_history":raw_history, "input":user_input})
