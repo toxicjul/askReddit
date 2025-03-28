@@ -9,13 +9,14 @@ from .models import ChatMemory
 
 from django.views.decorators.http import require_POST
 from django.shortcuts import redirect
+import sys
 
 
 @login_required
 def chat_view(request):
     """Render the chat page with history."""
     memory_obj, _ = ChatMemory.objects.get_or_create(user=request.user)
-    history = memory_obj.memory  # List of dicts: {"user": "...", "bot": "..."}
+    history = memory_obj.memory  
 
     return render(request, "chat.html", {
         "history": history,
@@ -29,12 +30,13 @@ def chat_api(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body)
+            
             message = data.get("message", "").strip()
-
+            
+            
             if not message:
                 return JsonResponse({"error": "Empty message"}, status=400)
 
-            # Call LangChain agent with user-specific memory
             response = get_agent_response(message, request.user)
 
             return JsonResponse({"reply": response})
@@ -49,4 +51,4 @@ def chat_api(request):
 @login_required
 def reset_chat(request):
     ChatMemory.objects.filter(user=request.user).delete()
-    return redirect('chat')  # Redirect back to chat view after reset
+    return redirect('chat')  

@@ -9,7 +9,6 @@
 
   <div class="flex flex-col w-full max-w-7xl mx-auto flex-1 p-4 h-screen">
     <div class="flex items-center justify-between bg-white p-4 rounded shadow mb-6">
-      <!-- Left: Reset -->
       <form action="{% url 'reset_chat' %}" method="post">
         {% csrf_token %}
         <button
@@ -20,12 +19,10 @@
         </button>
       </form>
     
-      <!-- Center: Title -->
       <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-center">
         <span class="text-black">Ask</span><span class="text-[#FF4500]">Reddit</span> AI 🤖
       </h1>
     
-      <!-- Right: Logout -->
       <form action="{% url 'account_logout' %}" method="post">
         {% csrf_token %}
         <button
@@ -37,7 +34,6 @@
       </form>
     </div>
 
-    <!-- Chat area -->
     <div id="chat-window" class="flex-1 overflow-y-auto space-y-4 mb-4">
       {% for msg in history %}
         <div class="flex justify-end">
@@ -52,19 +48,16 @@
         </div>
       {% endfor %}
       {% if request.method == 'POST' %}
-        <!-- User message -->
         <div class="flex justify-end">
           <div class="bg-blue-600 text-white p-3 rounded-xl max-w-[80%]">{{ request.POST.message }}</div>
         </div>
 
-        <!-- Bot thinking -->
         {% if not reply %}
         <div id="thinking" class="flex justify-start">
           <div class="bg-gray-300 text-gray-700 p-3 rounded-xl max-w-[80%] italic animate-pulse">Thinking...</div>
         </div>
         {% endif %}
 
-        <!-- Bot reply -->
         {% if reply %}
         <div class="flex justify-start">
           <div class="bg-gray-200 text-black p-3 rounded-xl max-w-[80%] whitespace-pre-line">
@@ -75,7 +68,6 @@
       {% endif %}
     </div>
 
-    <!-- Input form -->
     <form id="chat-form" class="flex gap-2">
       {% csrf_token %}
       <input id="chat-input" name="message" type="text" placeholder="Type your message..." class="flex-1 p-2 border rounded" required>
@@ -98,13 +90,11 @@
       const userText = input.value.trim();
       if (!userText) return;
 
-      // Show user message
       const userBubble = document.createElement("div");
       userBubble.className = "flex justify-end";
       userBubble.innerHTML = `<div class="bg-blue-600 text-white p-3 rounded-xl max-w-[80%]">${userText}</div>`;
       chatWindow.appendChild(userBubble);
 
-      // Show 'Thinking...'
       const botWrapper = document.createElement("div");
       botWrapper.className = "flex justify-start";
       botWrapper.innerHTML = `<div class="bg-gray-300 text-gray-700 p-3 rounded-xl max-w-[80%] italic animate-pulse">Thinking...</div>`;
@@ -124,7 +114,6 @@
 
         const data = await response.json();
 
-        // Replace thinking with real reply
         botWrapper.innerHTML = `<div class="bg-gray-200 text-black p-3 rounded-xl max-w-[80%] whitespace-pre-line">${data.reply}</div>`;
         chatWindow.scrollTop = chatWindow.scrollHeight;
       } catch (err) {
