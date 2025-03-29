@@ -11,6 +11,7 @@ import json
 from pydantic import ValidationError
 import os
 from dotenv import load_dotenv
+import openai
 
 load_dotenv()  
 
@@ -19,7 +20,27 @@ client_secret = os.getenv("REDDIT_CLIENT_SECRET")
 user_agent = os.getenv("REDDIT_USER_AGENT")
 openai_api_key = os.getenv("OPENAI_API_KEY")
 
-
+#-----------------------
+def string_to_html(text):
+    response = openai.chat.completions.create(
+        model="gpt-4o-mini-2024-07-18", 
+        messages=[
+            {
+                "role": "system",
+                "content": "You are a helpful assistant that converts Markdown or plain text to clean and semantic HTML. ONLY OUTPUT FINAL HTML! AND NO OTHER TEXT! ONLY USE P,STRONG,LIST AND A TAGS"
+            },
+            {
+                "role": "user",
+                "content": f"Convert the following to HTML:\n\n{text}"
+            }
+        ],
+        temperature=0,
+    )
+    try:
+        html_output = response.choices[0].message.content
+    except Exception as e:
+        print(e)
+    return html_output
 #-----------------------
 
 query_llm = ChatOpenAI(temperature=0.2, model="gpt-4o-mini-2024-07-18", openai_api_key=openai_api_key)
@@ -46,7 +67,7 @@ output: "search the r/germany subreddit for best germany dishes"
 Current user message: "what are the average salaries in canada"
 output: "search the r/canada subreddit for average salary"
 -------------------------
-if the user message does not need reddit for response or is asking about a past response, output "NO NOT USE THE REDDIT TOOL!" followed by the user message
+if the user message does not need reddit for response or is asking about a past response, output "NO NOT USE THE REDDIT TOOL FOR THIS PROMPT!" followed by the user message
 """
 )
 
@@ -56,7 +77,7 @@ prefix = """Have a conversation with a human, answering the following questions 
 suffix = """Begin!"
 
 {chat_history}
-Question: "{input}" Fetch about 10 reddit posts related to the question using the tool. respond in a detailed paragraph answer based on the reddit posts and give url when you reference information from it in a seperate paragraph titles references. ONLY GIVE VALID URLS DO NOT PUT PLACE HOLDERS.
+Question: "{input}" Fetch about 10 reddit posts related to the question using the tool, it's fine if you find less. respond in a detailed paragraph answer based on the reddit posts and give url when you reference information from it in a seperate paragraph titles references. ONLY GIVE VALID URLS DO NOT PUT PLACE HOLDERS.
 also when using the reddit tool IT"S VERY IMPORTANT to follow this format for action:
 
   "action": "reddit_search",
@@ -137,11 +158,12 @@ def get_agent_response(user_input, user):
         except:
             None
         
-        
+        html_output=string_to_html(str(response))
         chat_history.append({
             "user": user_input,
             "bot": response,
-            "context":observation_store
+            "context":observation_store,
+            "bot_html": html_output
         })
 
         chat_history = chat_history[-6:]
@@ -150,7 +172,7 @@ def get_agent_response(user_input, user):
     
     
         
-        return str(response)
+        return html_output
     except Exception as e:
             print("Error "+e)
             return ""

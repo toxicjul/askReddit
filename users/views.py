@@ -37,7 +37,7 @@ def chat_api(request):
             if not message:
                 return JsonResponse({"error": "Empty message"}, status=400)
 
-            response = get_agent_response(message, request.user)
+            response = str(get_agent_response(message, request.user))
 
             return JsonResponse({"reply": response})
 
